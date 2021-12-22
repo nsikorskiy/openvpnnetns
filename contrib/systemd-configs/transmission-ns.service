@@ -1,0 +1,20 @@
+[Unit]
+Description=Network namespace for transmission
+#StopWhenUnneeded=true
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+
+ExecStart=mkdir -p /etc/netns/transmission/
+ExecStart=/bin/sh -c 'echo "nameserver 127.0.0.1" | tee /etc/netns/transmission/resolv.conf'
+ExecStart=/sbin/ip netns add transmission
+ExecStart=/sbin/ip -netns transmission link set lo up
+ExecStart=/sbin/ip link add trm0 type veth peer name eth0 netns transmission
+ExecStart=/sbin/ip link set trm0 up
+ExecStart=/sbin/ip addr add 192.168.33.5/30 broadcast 192.168.33.7 dev trm0
+ExecStart=/sbin/ip -netns transmission link set eth0 up
+ExecStart=/sbin/ip -netns transmission addr add 192.168.33.6/30 broadcast 192.168.33.7 dev eth0
+
+ExecStop=/sbin/ip link del trm0
+ExecStop=/sbin/ip netns delete transmission
