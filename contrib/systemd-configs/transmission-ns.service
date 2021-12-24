@@ -1,5 +1,6 @@
 [Unit]
 Description=Network namespace for transmission
+After=network.target
 #StopWhenUnneeded=true
 
 [Service]
@@ -18,3 +19,8 @@ ExecStart=/sbin/ip -netns transmission addr add 192.168.33.6/30 broadcast 192.16
 
 ExecStop=/sbin/ip link del trm0
 ExecStop=/sbin/ip netns delete transmission
+
+[Install]
+WantedBy=multi-user.target
+Alias=transmission-ns.service
+
